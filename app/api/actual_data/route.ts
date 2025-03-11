@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   //   host: "172.16.1.129",
   //   port: 5432,
   //   database: "postgres",
-    
+
   // });
 
   // Connect to the database
@@ -44,28 +44,26 @@ export async function GET(req: NextRequest) {
       for (const [index, data] of results.entries()) {
         await new Promise((resolve) => setTimeout(resolve, 100));
         // Simulating delay
-        console.log(
-          `Processing row ${index} with OF ID: ${data.of_id}`
-        );
-   
-        console.log(`Inserting Order Fabrication.`);
-        const last_row = await insert_order_fabrication_data(clients, data);
+        console.log(`Processing row ${index} with OF ID: ${data.of_id}`);
 
-        console.log(`Done inserting order fabrication. Return ${last_row}`);
+        // if (data.production_start_date != "") {
+          console.log(`Inserting Order Fabrication.`);
+          const last_row = await insert_order_fabrication_data(clients, data);
 
-        const controler_id = await getControlerId(data.controler, clients);
+          console.log(`Done inserting order fabrication. Return ${last_row}`);
 
-        const collected_measurements = await collect_measurement(
-          clients,
-          controler_id,
-          data
-        );
+          const controler_id = await getControlerId(data.controler, clients);
 
-     
+          const collected_measurements = await collect_measurement(
+            clients,
+            controler_id,
+            data
+          );
 
-        await insert_measurements(clients, collected_measurements, last_row);
-        console.log(`Done inserting measurements.`);
-      }
+          await insert_measurements(clients, collected_measurements, last_row);
+          console.log(`Done inserting measurements.`);
+        }
+      // }
     });
 
   return new NextResponse("Hello World", { status: 200 });
@@ -160,42 +158,118 @@ const insert_order_fabrication_data = async (
 
     const { fields: getCompanyFields, rows: getCompanyRows } =
       await clients.query(getCompanyName);
-    let company_id
-    if(getCompanyRows.length!=0){
-     company_id = getCompanyRows[0].id;
-    }else{
-      company_id=null
+    let company_id;
+    if (getCompanyRows.length != 0) {
+      company_id = getCompanyRows[0].id;
+    } else {
+      company_id = null;
     }
-    let article_id 
-    if(getCompanyRows.length!=0){
-      article_id =  rows[0].id;
-     }else{
-       company_id=null
-     }
+    let article_id;
+    if (getCompanyRows.length != 0) {
+      article_id = rows[0].id;
+    } else {
+      company_id = null;
+    }
     const pallete_count = 1;
-    const created_at = created_date
-      ? DateTime.fromISO("2000-01-01T00:00:00.000Z").toISO()
-      : DateTime.fromFormat(created_date + "12:00 AM ", "dd/MM/yyyy HH:mm", {
+    console.log(
+      "created_date",
+      created_date,
+      "production_start_date:",
+      production_start_date,
+      "production start time:",
+      production_start_time.split(" ")[1],
+      "production_end_date:",
+      production_end_date,
+      "production_end_time:",
+      production_end_time.split(" ")[1]
+    );
+
+    let created_at;
+    if (created_date == "") {
+      console.log("Yes there is created at ");
+      created_at = DateTime.fromISO("2000-01-01T00:00:00.000Z").toISO();
+    } else {
+      console.log(
+        DateTime.fromFormat(created_date, "dd/MM/yyyy HH:mm", {
+          zone: "UTC",
+        }).toISO()
+      );
+      const getHour = created_date.split(" ")[1].split(":")[0];
+      console.log(getHour.length);
+      if (getHour.length == 2) {
+        created_at = DateTime.fromFormat(created_date, "dd/MM/yyyy HH:mm", {
           zone: "UTC",
         }).toISO();
+      } else {
+        created_at = DateTime.fromFormat(
+          created_date.split(" ")[0] + " 0" + created_date.split(" ")[1],
+          "dd/MM/yyyy HH:mm",
+          {
+            zone: "UTC",
+          }
+        ).toISO();
+      }
+    }
+
     const product_name = "";
     const order_fabrication_control = of_id;
-    const entry_date_time =
-      production_start_date == ""
-        ? DateTime.fromISO("2000-01-01T00:00:00.000Z").toISO()
-        : DateTime.fromFormat(
-            production_start_date + " " + production_start_time,
-            "dd/MM/yyyy HH:mm",
-            { zone: "UTC" }
-          ).toISO();
-    const exit_date_time =
-      production_end_time == ""
-        ? DateTime.fromISO("2000-01-01T00:00:00.000Z").toISO()
-        : DateTime.fromFormat(
-            production_end_date + " " + production_end_time,
-            "dd/MM/yyyy HH:mm",
-            { zone: "UTC" }
-          ).toISO();
+
+    let exit_date_time;
+    let entry_date_time;
+
+    if (production_start_date == "" || production_start_time == "") {
+      entry_date_time = DateTime.fromISO("2000-01-01T00:00:00.000Z").toISO();
+    } else {
+      const getHour = production_start_time.split(" ")[1].split(":")[0];
+      if (getHour.length == 1) {
+        entry_date_time = DateTime.fromFormat(
+          production_start_date + " 0" + production_start_time.split(" ")[1],
+          "dd/MM/yyyy HH:mm",
+          { zone: "UTC" }
+        ).toISO();
+      } else {
+        entry_date_time = DateTime.fromFormat(
+          production_start_date + " " + production_start_time.split(" ")[1],
+          "dd/MM/yyyy HH:mm",
+          { zone: "UTC" }
+        ).toISO();
+      }
+    }
+
+    if (production_end_date == "" || production_end_time == "") {
+      exit_date_time = DateTime.fromISO("2000-01-01T00:00:00.000Z").toISO();
+    } else {
+      console.log(
+        DateTime.fromFormat(
+          production_end_date + " " + production_start_time.split(" ")[1],
+          "dd/MM/yyyy HH:mm",
+          { zone: "UTC" }
+        ).toISO()
+      );
+      const getHour = production_end_time.split(" ")[1].split(":")[0];
+      if (getHour.length == 1) {
+        exit_date_time = DateTime.fromFormat(
+          production_end_date + " 0" + production_end_time.split(" ")[1],
+          "dd/MM/yyyy HH:mm",
+          { zone: "UTC" }
+        ).toISO();
+      } else {
+        exit_date_time = DateTime.fromFormat(
+          production_end_date + " " + production_end_time.split(" ")[1],
+          "dd/MM/yyyy HH:mm",
+          { zone: "UTC" }
+        ).toISO();
+      }
+    }
+
+    console.log(
+      "Exit Date  Time",
+      exit_date_time,
+      "Entry Date Time",
+      entry_date_time,
+      "Created_at",
+      created_at
+    );
 
     const insertData = {
       text: "INSERT INTO public.tbl_orders_form(customer_id, article_id,  pallete_count, created_at,  product_name, order_fabrication_control, entry_date_time, exit_date_time) VALUES ($1 , $2, $3, $4, $5, $6, $7, $8) RETURNING id;",
@@ -210,7 +284,7 @@ const insert_order_fabrication_data = async (
         exit_date_time,
       ],
     };
-  
+
     const { rows: insertDataRow } = await clients.query(insertData);
 
     const OF_LAST_ID = insertDataRow[0].id;
@@ -218,7 +292,7 @@ const insert_order_fabrication_data = async (
   } catch (e) {
     console.log(e);
     console.log(`Error something went wrong : ${e} . Returning false ${of_id}`);
-    process.exit
+    process.exit;
     return false;
   }
 };
@@ -298,8 +372,6 @@ const collect_measurement = (
     tube_quality,
   }: any
 ) => {
-
-
   const collected = [];
   collected.push({
     length: length_e,
@@ -371,7 +443,7 @@ const getControlerId = async (controler: Text, clients: pg.Client) => {
   };
   try {
     const { rows } = await clients.query(getControler);
-   
+
     return rows[0].uuid;
   } catch (e) {
     console.log("No uuid found . Returning super admin UUID...");
@@ -394,7 +466,7 @@ const insert_measurements = async (
     const h20 = data.h20 == "" ? 0 : parseFloat(data.h20);
 
     const insertMeasurement = {
-      text: "INSERT INTO public.tbl_measurement( order_form_id, length, inside_diameter, outside_diameter, flat_crush, h20, radial,  remarks, user_id )	VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id;",
+      text: "INSERT INTO public.tbl_measurement( order_form_id, length, inside_diameter, outside_diameter, flat_crush, h20, radial,  remarks, user_id,pallete_count )	VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,1) RETURNING id;",
       values: [
         last_row,
         length,
@@ -415,7 +487,7 @@ const insert_measurements = async (
       // );
     } catch (e) {
       console.log(e);
-    return 0;
+      return 0;
     }
   });
 };
