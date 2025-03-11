@@ -1,0 +1,10 @@
+"N°","Prénom_NOM","Identifiant","Mot_de_Passe","Type_d_autorisation","Type_d_accès_numérique"
+1,"Christophe MARCIC","CM","SJ","Contrôleur",1
+2,"Christophe BOUR","CB","CB","Commercial",1
+3,"Jean Guillaume PUECH","JGP","Microyop","Administrateur",1
+4,"Gérard AUGE","GA","GA","Administrateur",1
+5,"Daniel ANDRE","DA","DA","Contrôleur",1
+6,"Christophe MARCIC","CM","SJ","Commercial",1
+7,"Hervé BIZOT","HB","HB","Administrateur",1
+8,"Jasmine SCHWEITZER","JS","JS","Administrateur",1
+9,"Pascal BIMAL","PB","0308","Contrôleur",1

@@ -1,0 +1,10 @@
+id,Name,Identifier,Password,authorization_type, numiric_access, trial172
+1,"Christophe MARCIC","CM","SJ","Controler",1,"T"
+2,"Christophe BOUR","CB","CB","Commercial",1,"T"
+3,"Jean Guillaume PUECH","JGP","Microyop","Administrator",1,"T"
+4,"Gérard AUGE","GA","GA","Administrator",1,"T"
+5,"Daniel ANDRE","DA","DA","Controler",1,"T"
+6,"Christophe MARCIC","CM","SJ","Commercial",1,"T"
+7,"Hervé BIZOT","HB","HB","Administrateur",1,"T"
+8,"Jasmine SCHWEITZER","JS","JS","Administrator",1,"T"
+9,"Pascal BIMAL","PB","0308","Controler",1,"T"
