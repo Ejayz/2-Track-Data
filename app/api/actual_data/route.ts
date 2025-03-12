@@ -67,6 +67,10 @@ export async function GET(req: NextRequest) {
     });
 
   return new NextResponse("Hello World", { status: 200 });
+
+
+
+  
 }
 
 const insert_order_fabrication_data = async (
@@ -171,31 +175,14 @@ const insert_order_fabrication_data = async (
       company_id = null;
     }
     const pallete_count = 1;
-    console.log(
-      "created_date",
-      created_date,
-      "production_start_date:",
-      production_start_date,
-      "production start time:",
-      production_start_time.split(" ")[1],
-      "production_end_date:",
-      production_end_date,
-      "production_end_time:",
-      production_end_time.split(" ")[1]
-    );
+
 
     let created_at;
     if (created_date == "") {
-      console.log("Yes there is created at ");
       created_at = DateTime.fromISO("2000-01-01T00:00:00.000Z").toISO();
     } else {
-      console.log(
-        DateTime.fromFormat(created_date, "dd/MM/yyyy HH:mm", {
-          zone: "UTC",
-        }).toISO()
-      );
+ 
       const getHour = created_date.split(" ")[1].split(":")[0];
-      console.log(getHour.length);
       if (getHour.length == 2) {
         created_at = DateTime.fromFormat(created_date, "dd/MM/yyyy HH:mm", {
           zone: "UTC",
@@ -239,13 +226,7 @@ const insert_order_fabrication_data = async (
     if (production_end_date == "" || production_end_time == "") {
       exit_date_time = DateTime.fromISO("2000-01-01T00:00:00.000Z").toISO();
     } else {
-      console.log(
-        DateTime.fromFormat(
-          production_end_date + " " + production_start_time.split(" ")[1],
-          "dd/MM/yyyy HH:mm",
-          { zone: "UTC" }
-        ).toISO()
-      );
+    
       const getHour = production_end_time.split(" ")[1].split(":")[0];
       if (getHour.length == 1) {
         exit_date_time = DateTime.fromFormat(
@@ -262,14 +243,7 @@ const insert_order_fabrication_data = async (
       }
     }
 
-    console.log(
-      "Exit Date  Time",
-      exit_date_time,
-      "Entry Date Time",
-      entry_date_time,
-      "Created_at",
-      created_at
-    );
+
 
     const insertData = {
       text: "INSERT INTO public.tbl_orders_form(customer_id, article_id,  pallete_count, created_at,  product_name, order_fabrication_control, entry_date_time, exit_date_time) VALUES ($1 , $2, $3, $4, $5, $6, $7, $8) RETURNING id;",
